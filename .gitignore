@@ -1,0 +1,12 @@
+*.log
+*.pot
+*.pyc
+__pycache__/
+.pytest_cache/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media
+config/settings/local.py
+config/settings/production.py
+.env
