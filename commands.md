@@ -4,7 +4,8 @@ django
 python-dotenv==0.21.0
 djangorestframework==3.14.0
 pytest==7.4.1
-pytest-django-4.5.2
+pytest-django==4.5.2
+django-extensions==3.2.3
 
 # Commands
 
