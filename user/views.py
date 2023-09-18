@@ -12,22 +12,10 @@ from datetime import datetime
 @api_view(['POST'])
 def create(request):
     
-    data =JSONParser().parse(request)
+    data = JSONParser().parse(request)
     serializer = UserSerializer(data=data)
 
-    print(f"asd")
     if serializer.is_valid():
-        print(f"ddd")
-
-        User.objects.create(mb_id="dmddddkk3m1ccnaver.com",
-                            username='dddkkm@dm12cc',
-                            is_superuser=1,
-                            password='123',
-                            first_name='',
-                            last_name='',
-                            email='asd@naver.com',
-                            is_staff=1,
-                            is_active=1,
-                            date_joined=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                            created_at=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    return Response(data, status=200)
+        serializer.save()
+        return Response(serializer.data, status=200)
+    return Response(serializer.errors, status=400)
