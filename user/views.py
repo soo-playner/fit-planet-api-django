@@ -11,10 +11,16 @@ from datetime import datetime
 @csrf_exempt
 @api_view(['POST'])
 def create(request):
-    
+
     data = JSONParser().parse(request)
     serializer = UserSerializer(data=data)
 
+    password = data['password']
+    password_repeat = data['password_repeat']
+
+    if(password != password_repeat):
+        return Response({'password': '비밀번호가 일치하지 않습니다.'}, status=400)
+    
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=200)
