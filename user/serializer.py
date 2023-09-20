@@ -2,7 +2,7 @@ from rest_framework import serializers
 from user.models import User, Expert
 from django.contrib.auth import get_user_model
 
-class UserSerializer(serializers.ModelSerializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
       model = get_user_model()
@@ -20,10 +20,19 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_password(self, instance):
       if len(instance) < 8:
         raise serializers.ValidationError(detail="비밀번호는 8자리 이상 입력해주세요.")
+      return instance
 
     def create(self, validated_data):
        return User.objects.create_user(**validated_data)
-       
+    
+class UserSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+      model = get_user_model()
+      fields = ['id', 'mb_email', 'password', 'mb_phone', 'mb_name', 'mb_nickname', 'mb_social_type', 'mb_level', 'mb_birth', 'mb_gender']
+      extra_kwargs = {
+         'password': {'write_only': True}
+      }
     
 class ExpertSerializer(serializers.ModelSerializer):
 
