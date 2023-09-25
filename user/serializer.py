@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from user.models import User, Expert
 from django.contrib.auth import get_user_model
+import re
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     
@@ -20,6 +21,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def validate_password(self, instance):
       if len(instance) < 8:
         raise serializers.ValidationError(detail="비밀번호는 8자리 이상 입력해주세요.")
+      regex = '^(?=.*[\d])(?=.*[a-z])(?=.*[!@#$%^&*()])[\w\d!@#$%^&*()]{8,}$'
+      if not re.fullmatch(regex, instance):
+        raise serializers.ValidationError(detail="비밀번호 입력 양식을 확인해주세요.")
       return instance
 
     def create(self, validated_data):
@@ -33,7 +37,18 @@ class UserSerializer(serializers.ModelSerializer):
       extra_kwargs = {
          'password': {'write_only': True}
       }
-    
+
+class UserPasswordSerializer(serializers.ModelSerializer):
+
+    class Meta:
+      def validate_password(self, instance):
+        if len(instance) < 8:
+          raise serializers.ValidationError(detail="비밀번호는 8자리 이상 입력해주세요.")
+        regex = '^(?=.*[\d])(?=.*[a-z])(?=.*[!@#$%^&*()])[\w\d!@#$%^&*()]{8,}$'
+        if not re.fullmatch(regex, instance):
+          raise serializers.ValidationError(detail="비밀번호 입력 양식을 확인해주세요.")
+        return instance
+
 class ExpertSerializer(serializers.ModelSerializer):
 
   class Meta:
