@@ -38,6 +38,26 @@ class UserSerializer(serializers.ModelSerializer):
          'password': {'write_only': True}
       }
 
+class UserEmailDupSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = get_user_model()
+    fields = ['mb_email']
+  
+  def validate_mb_email(self, instance):
+    if "admin" in instance:
+      raise serializers.ValidationError(detail="사용할 수 없는 이메일입니다.")
+    return instance
+  
+class UserNickDupSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = get_user_model()
+    fields = ['mb_nickname']
+  
+  def validate_mb_nickname(self, instance):
+    if "admin" in instance:
+      raise serializers.ValidationError(detail="사용할 수 없는 닉네임입니다.")
+    return instance
+
 class UserFindEmailSerializer(serializers.ModelSerializer):
 
     class Meta:

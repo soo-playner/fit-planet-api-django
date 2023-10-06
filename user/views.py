@@ -1,5 +1,4 @@
-from rest_framework.renderers import JSONRenderer
-from user.serializer import UserPasswordResetSerializer, UserRegisterSerializer, UserSerializer, UserFindEmailSerializer
+from user.serializer import *
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
@@ -12,6 +11,8 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from .models import User
 from .validators import *
+from config.settings.permissions import CustomEmailPermission
+from django.shortcuts import get_object_or_404
 
 
 class OnlyAuthenticatedUserView(APIView):
@@ -30,25 +31,15 @@ class OnlyAuthenticatedUserView(APIView):
 def dup_check(request):
 
     data = JSONParser().parse(request)
-    dup_type = data['type']
-    value = data['value']
 
-    if not dup_type or not value:
-        return Response({'message': '값을 입력해주세요.'}, status=status.HTTP_400_BAD_REQUEST)
+    if data['type'] == 'email':
+        serializer = UserEmailDupSerializer(data=data)
+    elif data['type'] == 'nickname':
+        serializer = UserNickDupSerializer(data=data)
 
-    if dup_type == 'email':
-        try:
-            _duplicated = User.objects.get(mb_email=value)
-        except:
-            _duplicated = None
-    elif dup_type == 'nickname':
-        try:
-            _duplicated = User.objects.get(mb_nickname=value)
-        except:
-            _duplicated = None
-    if _duplicated is None:
-        return Response({'message': '가입 가능한 ' + dup_type + ' 입니다.'}, status=status.HTTP_200_OK)
-    return Response({'message': '중복된 ' + dup_type + ' 입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+    if serializer.is_valid():
+        return Response({'message': '가입 가능한 ' + data['type'] + ' 입니다.'}, status=status.HTTP_200_OK)
+    else: return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt
@@ -106,21 +97,39 @@ def find_id(request):
     serializer = UserFindEmailSerializer(data=data)
     if serializer.is_valid():
         return Response(serializer.validated_data['mb_phone'], status=status.HTTP_200_OK)
-    return Response({"message": ""}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
-@api_view(['POST'])
-def reset_password(request):
+# @csrf_exempt
+# @api_view(['PUT'])
+# @permission_classes([IsOwner])
+# def reset_password(request):
 
-    data = JSONParser().parse(request)
+#     data = JSONParser().parse(request)
+#     user = get_object_or_404(User, mb_email=data['mb_email'])
 
-    if data['password'] != data['password_repeat']:
-        return Response({"message": "비밀번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
-    user = User.objects.get(mb_email=data['mb_email'])
-    serializer = UserPasswordResetSerializer(user, data=data)
+#     if data['password'] != data['password_repeat']:
+#         return Response({"message": "비밀번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
+#     serializer = UserPasswordResetSerializer(user, data=data)
 
-    if serializer.is_valid():
-        serializer.save()
-        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
-    else: return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+#     else: return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AuthDetailView(APIView):
+
+    permission_classes = [CustomEmailPermission]
+
+    def get_object(self, mb_email):
+        user = get_object_or_404(User, mb_email=mb_email)
+        self.check_object_permissions(self.request, user)
+        return user
+    
+    def put(self, request, mb_email):
+        user = self.get_object(mb_email)
+        serializer = UserPasswordResetSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+        else: return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
