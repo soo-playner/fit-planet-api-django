@@ -78,7 +78,7 @@ class UserPasswordResetSerializer(serializers.ModelSerializer):
   class Meta:
     model = get_user_model()
     password_repeat = serializers.CharField(max_length=255)
-    fields = ['id', 'mb_email', 'password']
+    fields = ['id', 'password']
     extra_kwargs = {
       'password': {'write_only': True}
     }

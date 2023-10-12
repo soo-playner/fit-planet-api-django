@@ -121,13 +121,13 @@ class AuthDetailView(APIView):
 
     permission_classes = [CustomEmailPermission]
 
-    def get_object(self, mb_email):
-        user = get_object_or_404(User, mb_email=mb_email)
+    def get_object(self, request):
+        user = get_object_or_404(User, mb_email=request)
         self.check_object_permissions(self.request, user)
         return user
     
-    def put(self, request, mb_email):
-        user = self.get_object(mb_email)
+    def put(self, request):
+        user = self.get_object(request.data['mb_email'])
         serializer = UserPasswordResetSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()

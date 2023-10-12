@@ -13,7 +13,7 @@ urlpatterns = [
     path('jwt-auth/refresh/', TokenRefreshView.as_view(), name="token_refresh"),
     path('jwt-auth/verify/', TokenVerifyView.as_view(), name="token_verify"),
     path('jwt-auth/authonly/', views.OnlyAuthenticatedUserView.as_view()),
-    path('reset-password/<str:mb_email>/', views.AuthDetailView.as_view())
+    path('reset-password/', views.AuthDetailView.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

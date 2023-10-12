@@ -10,8 +10,5 @@ class CustomEmailPermission(BasePermission):
     return request.user and request.user.is_authenticated
   
   def has_object_permission(self, request, view, obj):
-
-    print(obj.mb_email)
-    print(request.user)
-
+    
     return obj.mb_email == str(request.user)
